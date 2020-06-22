@@ -1,5 +1,6 @@
 package io.github.ivvve.studyolleh.account;
 
+import io.github.ivvve.studyolleh.domain.Account;
 import io.github.ivvve.studyolleh.domain.AccountRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -56,12 +57,13 @@ class AccountControllerTest {
     @Test
     void signUpSubmitWithCorrectInput() throws Exception {
         final String email = "keesun@email.com";
+        final String password = "12345";
 
         this.mockMvc.perform(
                 post("/sign-up")
                         .param("nickname", "keesun")
                         .param("email", email)
-                        .param("password", "12345")
+                        .param("password", password)
                         .with(csrf())
         )
                 .andExpect(status().is3xxRedirection())
@@ -69,5 +71,8 @@ class AccountControllerTest {
 
         assertThat(this.accountRepository.existsByEmail(email)).isTrue();
         then(this.mailSender).should().send(any(SimpleMailMessage.class));
+
+        final Account account = this.accountRepository.findByEmail(email).get();
+        assertThat(account.getPassword()).isNotEqualTo(password);
     }
 }

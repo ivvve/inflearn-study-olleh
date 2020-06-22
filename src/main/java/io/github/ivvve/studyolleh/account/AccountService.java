@@ -14,6 +14,7 @@ import javax.validation.Valid;
 public class AccountService {
     private final AccountRepository accountRepository;
     private final JavaMailSender mailSender;
+    private final PasswordHashEncoder passwordHashEncoder;
 
     public void processNewAccount(final SignUpForm signUpForm) {
         final Account newAccount = saveNewAccount(signUpForm);
@@ -25,7 +26,7 @@ public class AccountService {
         final Account account = Account.builder()
                 .email(signUpForm.getEmail())
                 .nickname(signUpForm.getNickname())
-                .password(signUpForm.getPassword()) // TODO encoding
+                .password(this.passwordHashEncoder.encode(signUpForm.getPassword()))
                 .studyEnrollmentResultByWeb(true)
                 .studyCreatedByWeb(true)
                 .studyUpdatedByWeb(true)
