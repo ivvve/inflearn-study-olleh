@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.Valid;
 
@@ -16,6 +17,7 @@ public class AccountService {
     private final JavaMailSender mailSender;
     private final PasswordHashEncoder passwordHashEncoder;
 
+    @Transactional
     public void processNewAccount(final SignUpForm signUpForm) {
         final Account newAccount = saveNewAccount(signUpForm);
         newAccount.generateEmailCheckToken();

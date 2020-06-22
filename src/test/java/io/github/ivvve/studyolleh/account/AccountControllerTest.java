@@ -74,5 +74,42 @@ class AccountControllerTest {
 
         final Account account = this.accountRepository.findByEmail(email).get();
         assertThat(account.getPassword()).isNotEqualTo(password);
+        assertThat(account.getEmailCheckToken()).isNotNull();
+    }
+
+    @DisplayName("인증 메일 확인 - 입력값 오류")
+    @Test
+    void checkEmailTokenWithWrongInput() throws Exception {
+        this.mockMvc.perform(
+                get("/check-email-token")
+                        .param("token", "asdfasdaf")
+                        .param("email", "email@email.com")
+        )
+                .andExpect(status().isOk())
+                .andExpect(model().attributeExists("error"))
+                .andExpect(view().name("account/checked-email"));
+    }
+
+    @DisplayName("인증 메일 확인 - 입력값 정상")
+    @Test
+    void checkEmailTokenWithCorrentInput() throws Exception {
+        Account account = Account.builder()
+                .email("test@email.com")
+                .password("12344567")
+                .nickname("keesun")
+                .build();
+        account.generateEmailCheckToken();
+        account = this.accountRepository.save(account);
+
+        this.mockMvc.perform(
+                get("/check-email-token")
+                        .param("token", account.getEmailCheckToken())
+                        .param("email", account.getEmail())
+        )
+                .andExpect(status().isOk())
+                .andExpect(model().attributeDoesNotExist("error"))
+                .andExpect(model().attributeExists("nickname"))
+                .andExpect(model().attributeExists("numberOfUser"))
+                .andExpect(view().name("account/checked-email"));
     }
 }
